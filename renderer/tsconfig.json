@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../main/game/create-game.ts",
+    "../main/bot/create-bot.ts"
+  ],
+  "exclude": ["node_modules"]
+}
