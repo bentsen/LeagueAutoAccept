@@ -3,17 +3,10 @@ import Image from "next/image";
 import React from "react";
 
 export type ILeague = {
-  id: string;
+  key: string;
   name: string;
   image: string;
 };
-
-interface InputProps
-  extends React.PropsWithoutRef<React.JSX.IntrinsicElements["input"]> {
-  label?: string;
-  icon?: React.JSX.Element;
-  clear?: () => void;
-}
 
 export const Input = ({
   content,
@@ -23,8 +16,8 @@ export const Input = ({
 }: {
   content: ILeague[];
   label?: string;
-  selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   const [search, setSearch] = React.useState<string>("");
 
@@ -40,6 +33,7 @@ export const Input = ({
       <Combobox.Input
         className={"h-10 rounded-md w-full indent-2"}
         onChange={(event) => setSearch(event.target.value)}
+        value={selected[1] != "0" ? selected[0] : ""}
       />
       <div className="w-full relative">
         <Combobox.Options
@@ -48,7 +42,7 @@ export const Input = ({
           }
         >
           {filteredContent.map((c) => (
-            <Combobox.Option key={c.id} value={c.name}>
+            <Combobox.Option key={c.key} value={[c.name, c.key]}>
               <div className="flex flex-row py-1 items-center pl-2 gap-2 cursor-pointer hover:bg-gray-200">
                 <Image src={c.image} width={30} height={30} />
                 {c.name}

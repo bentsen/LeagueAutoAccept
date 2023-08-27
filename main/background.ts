@@ -36,10 +36,10 @@ ipcMain.on("stop-bot", () => {
 });
 
 type IData = {
-  champion: string;
-  championBan: string;
-  spell1: string;
-  spell2: string;
+  champion: string[];
+  championBan: string[];
+  spell1: string[];
+  spell2: string[];
 };
 
 ipcMain.on("start-bot", (event, args: IData) => {

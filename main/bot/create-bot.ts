@@ -1,19 +1,6 @@
 import { Hardware, type WindowInfo, sleep } from "keysender";
 import { LCU } from "../LCU";
 
-let pickedChamp: boolean = false;
-let lockedChamp: boolean = false;
-let pickedBan: boolean = false;
-let lockedBan: boolean = false;
-let pickedSpell1: boolean = false;
-let pickedSpell2: boolean = false;
-let sentChatMessages: boolean = false;
-
-let lastActStartTime: number;
-let champSelectStart: number;
-let lastActId: number;
-let lastChatRoom: string = "";
-
 export default (win: WindowInfo) => {
   const { keyboard, mouse, workwindow } = new Hardware(win.handle);
   sleep(250);
@@ -71,34 +58,20 @@ export default (win: WindowInfo) => {
       }
     },
 
-    async handleChampSelect() {
-      LCU()
-        .getLeagueAuth()
-        .then(async (leagueAuth: string[]) => {
-          if (leagueAuth[1]) {
-            const currentChampSelect: string[] = await LCU().clientRequest(
-              "GET",
-              "lol-champ-select/v1/session",
-              leagueAuth
-            );
-            console.log(currentChampSelect);
-          }
-        });
+    async gameSession() {
+      const gameSession: string[] = await LCU().clientRequest(
+        "GET",
+        "/lol-gameflow/v1/session"
+      );
+      return gameSession;
     },
 
     async showCurrentUser() {
-      LCU()
-        .getLeagueAuth()
-        .then(async (leagueAuth: string[]) => {
-          if (leagueAuth[1]) {
-            const currentUser: string[] = await LCU().clientRequest(
-              "GET",
-              "/lol-summoner/v1/current-summoner",
-              leagueAuth
-            );
-            console.log("user: ", currentUser);
-          }
-        });
+      const currentUser: string[] = await LCU().clientRequest(
+        "GET",
+        "/lol-summoner/v1/current-summoner"
+      );
+      console.log("user: ", currentUser);
     },
   };
 };
