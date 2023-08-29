@@ -1,15 +1,13 @@
-import electron from "electron";
 import { LCU } from "../LCU";
 import { GameFlowSession } from "../../renderer/utils/@types/LCU/lol-gameflow/session";
 import { ChampSelectSession } from "../../renderer/utils/@types/LCU/lol-champ-select/session";
-
-const ipcRenderer = electron.ipcRenderer;
+import { BrowserWindow } from "electron";
 
 type IData = {
-  champion: string;
-  championBan: string;
-  spell1: string;
-  spell2: string;
+  champion: string[];
+  championBan: string[];
+  spell1: string[];
+  spell2: string[];
 };
 
 let pickedChamp: boolean = false;
@@ -25,7 +23,13 @@ let champSelectStart: number;
 let lastActId: number;
 let lastChatRoom: string = "";
 
-export default async ({ args }: { args: IData }) => {
+export default async ({
+  args,
+  mainWindow,
+}: {
+  args: IData;
+  mainWindow: BrowserWindow;
+}) => {
   while (true) {
     const gameSession: {
       status: string;
@@ -37,36 +41,35 @@ export default async ({ args }: { args: IData }) => {
 
       switch (phase) {
         case "Lobby":
-          console.log("In lobby");
+          mainWindow.webContents.send("send-log", "In lobby");
           await sleep(5000);
           break;
         case "Matchmaking":
-          console.log("In Matchmaking");
+          mainWindow.webContents.send("send-log", "In matchmaking");
           await sleep(2000);
           break;
         case "ReadyCheck":
-          console.log("Ready check pop");
+          mainWindow.webContents.send("send-log", "Ready check");
           LCU().clientRequest("POST", "lol-matchmaking/v1/ready-check/accept");
           break;
         case "ChampSelect":
-          console.log("In champselect");
+          mainWindow.webContents.send("send-log", "In ChampionSelect");
           handleChampSelect(args);
           break;
         case "InProgress":
-          console.log("In progress");
-          console.log("in game");
+          mainWindow.webContents.send("send-log", "Inside Game");
           await sleep(9000);
           break;
         case "WaitingForStats":
-          console.log("waiting for stats");
+          mainWindow.webContents.send("send-log", "waiting for stats");
           await sleep(9000);
           break;
         case "PreEndOfGame":
-          console.log("honor screen");
+          mainWindow.webContents.send("send-log", "In honorscreen");
           await sleep(9000);
           break;
         case "EndOfGame":
-          console.log("stats screen");
+          mainWindow.webContents.send("send-log", "In statscreen");
           await sleep(5000);
           break;
         default:
@@ -101,14 +104,9 @@ async function handleChampSelect(args: IData) {
         await LCU().clientRequest(
           "PATCH",
           "lol-champ-select/v1/session/my-selection",
-          JSON.stringify({
-            selectedSkinId: 0,
+          {
             spell1Id: Number(args.spell1[1]),
             spell2Id: Number(args.spell2[1]),
-            wardSkinId: 0,
-          }),
-          {
-            "Content-Type": "application/json",
           }
         );
       console.log("API Response:", champSelectActions);
@@ -174,7 +172,6 @@ function handlePickAction(
       currentTime - 10000 > champSelectStart || // here we check if enough time has passed since the planning phase has started
       champSelectPhase != "PLANNING" // Check if its even planning phase at all
     ) {
-      console.log("jeg hover champion");
       console.log(args.champion[1]);
       hoverChampion(actId, args.champion[1], "pick");
     }
@@ -231,9 +228,9 @@ async function hoverChampion(
     await LCU().clientRequest(
       "PATCH",
       "lol-champ-select/v1/session/actions/" + actId,
-      JSON.stringify({
+      {
         championId: currentChamp,
-      })
+      }
     );
   console.log(champSelectAction.status);
   if (champSelectAction.status == "204") {
@@ -255,10 +252,10 @@ async function lockChampion(
     await LCU().clientRequest(
       "PATCH",
       "lol-champ-select/v1/session/actions/" + actId,
-      JSON.stringify({
+      {
         championId: championId,
         completed: true,
-      })
+      }
     );
   console.log(actId);
   console.log(championId);

@@ -33,20 +33,24 @@ export const Input = ({
       <Combobox.Input
         className={"h-10 rounded-md w-full indent-2"}
         onChange={(event) => setSearch(event.target.value)}
-        value={selected[1] != "0" ? selected[0] : ""}
+        displayValue={(e) => (e[1] == 0 ? "" : e[0])}
       />
       <div className="w-full relative">
         <Combobox.Options
-          className={
-            "absolute z-90 max-h-40 w-full overflow-auto rounded-b-xl bg-white"
-          }
+          className={"absolute z-90 max-h-40 w-full overflow-auto bg-white"}
         >
           {filteredContent.map((c) => (
             <Combobox.Option key={c.key} value={[c.name, c.key]}>
-              <div className="flex flex-row py-1 items-center pl-2 gap-2 cursor-pointer hover:bg-gray-200">
-                <Image src={c.image} width={30} height={30} />
-                {c.name}
-              </div>
+              {({ active, selected }) => (
+                <div
+                  className={`flex flex-row py-1 items-center pl-2 gap-2 cursor-pointer ${
+                    active ? "bg-gray-200" : "bg-white"
+                  }`}
+                >
+                  <Image src={c.image} width={30} height={30} />
+                  {c.name}
+                </div>
+              )}
             </Combobox.Option>
           ))}
         </Combobox.Options>

@@ -40,12 +40,7 @@ export default () => {
     });
   }
   return {
-    async clientRequest(
-      method: string,
-      url: string,
-      body: string | null = null,
-      headers: Record<string, string> = {}
-    ) {
+    async clientRequest<T>(method: string, url: string, body: T | null = null) {
       const leagueAuth: string[] = await getLeagueAuth();
       const handler = new https.Agent({
         rejectUnauthorized: false,
@@ -60,8 +55,8 @@ export default () => {
         client.defaults.headers.common[
           "Authorization"
         ] = `Basic ${leagueAuth[0]}`;
-
-        Object.assign(client.defaults.headers.common, headers);
+        client.defaults.headers.common["Accept"] = "application/json";
+        client.defaults.headers.common["Content-Type"] = "application/json";
 
         let response;
 

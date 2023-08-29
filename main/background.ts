@@ -2,8 +2,8 @@ import { app, ipcMain } from "electron";
 import serve from "electron-serve";
 import { createWindow } from "./helpers";
 import { runBot } from "./bot";
-const isProd: boolean = process.env.NODE_ENV === "production";
 
+const isProd: boolean = process.env.NODE_ENV === "production";
 if (isProd) {
   serve({ directory: "app" });
 } else {
@@ -15,7 +15,8 @@ if (isProd) {
 
   const mainWindow = createWindow("main", {
     width: 1000,
-    height: 600,
+    height: 595,
+    resizable: false,
   });
 
   if (isProd) {
@@ -25,23 +26,25 @@ if (isProd) {
     await mainWindow.loadURL(`http://localhost:${port}/home`);
     mainWindow.webContents.openDevTools();
   }
+
+  app.on("window-all-closed", () => {
+    app.quit();
+  });
+
+  type IData = {
+    champion: string[];
+    championBan: string[];
+    spell1: string[];
+    spell2: string[];
+  };
+
+  ipcMain.on("start-bot", (event, args: IData) => {
+    (async () => {
+      runBot({ args, mainWindow });
+    })();
+  });
+
+  ipcMain.on("stop-bot", () => {
+    console.log("stop bot");
+  });
 })();
-
-app.on("window-all-closed", () => {
-  app.quit();
-});
-
-ipcMain.on("stop-bot", () => {
-  console.log("stop bot");
-});
-
-type IData = {
-  champion: string[];
-  championBan: string[];
-  spell1: string[];
-  spell2: string[];
-};
-
-ipcMain.on("start-bot", (event, args: IData) => {
-  runBot({ args });
-});
